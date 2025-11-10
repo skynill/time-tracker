@@ -22,8 +22,7 @@ public class TimeGeneratorService implements AsyncRunnable {
 
     private final AtomicLong generatedCount = new AtomicLong(0);
 
-    private final ReentrantLock lock = new ReentrantLock();
-    private ExecutorService executor;
+    private volatile ExecutorService executor;
 
 
     public TimeGeneratorService(TimeProducer timeProducer) {
@@ -31,13 +30,13 @@ public class TimeGeneratorService implements AsyncRunnable {
     }
 
     @Override
-    public void startAsync() {
-        executor = AsyncOrchestrator.startWithPreStartTask(lock, executor, this::generateLoop, this::cleanGeneratedCount, SERVICE_NAME);
+    public synchronized void startAsync() {
+        executor = AsyncOrchestrator.startWithPreStartTask(executor, this::generateLoop, this::cleanGeneratedCount, SERVICE_NAME);
     }
 
     @Override
-    public void stopAsync() {
-        AsyncOrchestrator.stop(lock, executor, SERVICE_NAME);
+    public synchronized void stopAsync() {
+        AsyncOrchestrator.stop(executor, SERVICE_NAME);
     }
 
     public long getGeneratedCount() {

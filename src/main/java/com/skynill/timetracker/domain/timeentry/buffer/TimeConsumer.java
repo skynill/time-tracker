@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 @Component
@@ -19,8 +18,7 @@ public class TimeConsumer implements AsyncRunnable {
     private final TimeQueue buffer;
     private final TimeService timeService;
 
-    private final ReentrantLock lock = new ReentrantLock();
-    private ExecutorService executor;
+    private volatile ExecutorService executor;
 
     public TimeConsumer(TimeQueue buffer, TimeService timeService) {
         this.buffer = buffer;
@@ -28,13 +26,13 @@ public class TimeConsumer implements AsyncRunnable {
     }
 
     @Override
-    public void startAsync() {
-        executor = AsyncOrchestrator.start(lock, executor, this::consume, SERVICE_NAME);
+    public synchronized void startAsync() {
+        executor = AsyncOrchestrator.start(executor, this::consume, SERVICE_NAME);
     }
 
     @Override
-    public void stopAsync() {
-        AsyncOrchestrator.stop(lock, executor, SERVICE_NAME);
+    public synchronized void stopAsync() {
+        AsyncOrchestrator.stop(executor, SERVICE_NAME);
     }
 
     private void consume() {

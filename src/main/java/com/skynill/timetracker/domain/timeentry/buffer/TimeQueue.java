@@ -24,8 +24,7 @@ public class TimeQueue implements AsyncRunnable {
     private final AtomicLong droppedCount = new AtomicLong(0);
     private final AtomicLong offerCount = new AtomicLong(0);
 
-    private final ReentrantLock lock = new ReentrantLock();
-    private ExecutorService executor;
+    private volatile ExecutorService executor;
 
     public TimeQueue(@Value("${app.time.buffer.capacity}") int capacity) {
         int cap = capacity > 0 ? capacity : DEFAULT_CAPACITY;
@@ -34,13 +33,13 @@ public class TimeQueue implements AsyncRunnable {
     }
 
     @Override
-    public void startAsync() {
-        executor = AsyncOrchestrator.start(lock, executor, this::bufferUtilization, SERVICE_NAME_FOR_ASYNC);
+    public synchronized void startAsync() {
+        executor = AsyncOrchestrator.start(executor, this::bufferUtilization, SERVICE_NAME_FOR_ASYNC);
     }
 
     @Override
-    public void stopAsync() {
-        AsyncOrchestrator.stop(lock, executor, SERVICE_NAME_FOR_ASYNC);
+    public synchronized void stopAsync() {
+        AsyncOrchestrator.stop(executor, SERVICE_NAME_FOR_ASYNC);
     }
 
     public void bufferClean() {
