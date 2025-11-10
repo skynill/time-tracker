@@ -1,0 +1,45 @@
+volumes:
+  postgres_data:
+networks:
+  app-network:
+    driver: bridge
+
+services:
+
+  time-tracker-db:
+    image: postgres:18-alpine
+    container_name: time-tracker-db
+    environment:
+      POSTGRES_DB: time_tracker_db
+      POSTGRES_USER: time_tracker_user
+      POSTGRES_PASSWORD: ${TIME_TRACKER_PASS}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 25432:5432
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U time_tracker_user -d time_tracker_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  time-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: time-tracker
+    networks:
+      - app-network
+    depends_on:
+      time-tracker-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://time-tracker-db:5432/time_tracker_db
+      SPRING_DATASOURCE_USERNAME: time_tracker_user
+      SPRING_DATASOURCE_PASSWORD: ${TIME_TRACKER_PASS}
+    ports:
+      - "8080:8080"
+    restart: on-failure

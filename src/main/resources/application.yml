@@ -1,0 +1,40 @@
+app:
+  time:
+    buffer:
+      capacity: 10
+
+spring:
+  application:
+    name: time-tracker
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:postgresql://localhost:25432/time_tracker_db
+    username: time_tracker_user
+    password: ${TIME_TRACKER_PASS}
+    hikari:
+      maximum-pool-size: 4
+      minimum-idle: 2
+      connection-timeout: 30000
+      max-lifetime: 1000000
+      leak-detection-threshold: 25000
+      idle-Timeout: 10000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 10
+          order_inserts: true
+          order_updates: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    contexts: dev
+    default-schema: public
+    drop-first: false

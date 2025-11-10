@@ -1,0 +1,47 @@
+app:
+  time:
+    buffer:
+      capacity: 10
+
+logging:
+  level:
+    com:
+      skynill:
+        timetracker: DEBUG
+    org:
+      springframework:
+        retry: DEBUG
+      hibernate:
+        SQL: INFO
+    liquibase: WARN
+
+spring:
+  application:
+    name: time-tracker
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 4
+      minimum-idle: 2
+      connection-timeout: 30000
+      max-lifetime: 1000000
+      leak-detection-threshold: 25000
+      idle-Timeout: 10000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      properties:
+        hibernate:
+          jdbc:
+            batch_size: 10
+            order_inserts: true
+            order_updates: true
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    contexts: dev
+    default-schema: public
+    drop-first: false
