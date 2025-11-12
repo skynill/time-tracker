@@ -24,7 +24,7 @@ public class TimeQueue implements AsyncRunnable {
     private final AtomicLong droppedCount = new AtomicLong(0);
     private final AtomicLong offerCount = new AtomicLong(0);
 
-    private volatile ExecutorService executor;
+    private ExecutorService executor;
 
     public TimeQueue(@Value("${app.time.buffer.capacity}") int capacity) {
         int cap = capacity > 0 ? capacity : DEFAULT_CAPACITY;

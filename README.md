@@ -21,7 +21,7 @@ Docker, Docker-Compose
 ### Local Setup
 
 RUN Postgrest DB in Docker container
-> dc up time-tracker-db
+> docker-compose up time-tracker-db
 
 RUN Application
 > ./mvnw spring-boot:run

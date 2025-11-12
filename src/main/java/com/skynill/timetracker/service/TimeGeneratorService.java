@@ -22,7 +22,7 @@ public class TimeGeneratorService implements AsyncRunnable {
 
     private final AtomicLong generatedCount = new AtomicLong(0);
 
-    private volatile ExecutorService executor;
+    private ExecutorService executor;
 
 
     public TimeGeneratorService(TimeProducer timeProducer) {

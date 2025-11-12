@@ -18,7 +18,7 @@ public class TimeConsumer implements AsyncRunnable {
     private final TimeQueue buffer;
     private final TimeService timeService;
 
-    private volatile ExecutorService executor;
+    private ExecutorService executor;
 
     public TimeConsumer(TimeQueue buffer, TimeService timeService) {
         this.buffer = buffer;
@@ -40,7 +40,12 @@ public class TimeConsumer implements AsyncRunnable {
             try {
                 TimeEntry entry = buffer.take();
                 log.debug("Time entry: {} was polled from buffer ", entry.getTimestamp());
-                timeService.save(entry);
+                try {
+                    timeService.save(entry);
+                } catch (Exception e) {
+                    log.warn("Something happened during save record");
+                }
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.warn("Thread interrupted");
